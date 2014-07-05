@@ -9,7 +9,10 @@ class PidFile
             'overwriteExisting' => false,
             'overcomeAdversity' => false,
             'unlinkOthers'      => false,
-            'signals'           => [ SIGINT, SIGTERM ]
+            'signals'           => [
+                SIGINT  => function() { exit(); },
+                SIGTERM => function() { exit(); },
+            ],
         ], $options);
 
         static::_setupSignals($options['signals']);
@@ -29,11 +32,9 @@ class PidFile
 
     protected static function _setupSignals($signals)
     {
-        $handler = sprintf("%s::%s", __CLASS__, '_signalHandler');
-        array_map(
-            function($signal) use ($handler) { pcntl_signal($signal, $handler); },
-            $signals
-        );
+        foreach($signals as $signal => $handler) {
+            pcntl_signal($signal, $handler);
+        }
     }
 
     protected static function _getPath()
