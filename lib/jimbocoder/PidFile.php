@@ -41,7 +41,7 @@ class PidFile
 
     protected static function _getPath()
     {
-        if ( getenv('PIDFILE') ) {
+        if ( !getenv('PIDFILE') ) {
             $pidFileDir = getenv('PIDDIR') ? getenv('PIDDIR') : '/tmp';
             putenv(sprintf('PIDFILE=%s/%s.pid', realpath($pidFileDir), basename($_SERVER['PHP_SELF'])));
         }
