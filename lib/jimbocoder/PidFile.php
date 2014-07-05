@@ -5,6 +5,7 @@ class PidFile
 {
     public static function managed($options = [])
     {
+        declare(ticks=1);
         $options = array_merge_recursive([
             'overwriteExisting' => false,
             'overcomeAdversity' => false,
@@ -12,6 +13,7 @@ class PidFile
             'signals'           => [
                 SIGINT  => function() { exit(); },
                 SIGTERM => function() { exit(); },
+                SIGQUIT => function() { exit(); },
             ],
         ], $options);
 
@@ -39,11 +41,11 @@ class PidFile
 
     protected static function _getPath()
     {
-        if ( !isset($_ENV['PIDFILE']) ) {
-            $pidFileDir = isset($_ENV['PIDDIR']) ? $_ENV['PIDDIR'] : '/var/run';
-            $_ENV['PIDFILE'] = sprintf("%s/%s.pid", realpath($pidFileDir), basename($_SERVER['PHP_SELF']));
+        if ( getenv('PIDFILE') ) {
+            $pidFileDir = getenv('PIDDIR') ? getenv('PIDDIR') : '/tmp';
+            putenv(sprintf('PIDFILE=%s/%s.pid', realpath($pidFileDir), basename($_SERVER['PHP_SELF'])));
         }
-        return $_ENV['PIDFILE'];
+        return getenv('PIDFILE');
     }
 
     protected static function _write($overwriteExisting = false)
