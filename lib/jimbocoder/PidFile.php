@@ -3,24 +3,24 @@ namespace jimbocoder;
 
 class PidFile
 {
-    public static function managed($options = [])
+    public static function managed($options = array())
     {
         declare(ticks=1);
-        $options = array_merge_recursive([
+        $options = array_merge_recursive(array(
             'overwriteExisting' => false,
             'overcomeAdversity' => false,
             'unlinkOthers'      => false,
-            'signals'           => [
+            'signals'           => array(
                 SIGINT  => function() { exit(); },
                 SIGTERM => function() { exit(); },
                 SIGQUIT => function() { exit(); },
-            ],
-        ], $options);
+            ),
+        ), $options);
 
         static::_setupSignals($options['signals']);
         static::_write($options['overwriteExisting']);
         register_shutdown_function(function() use ($options) {
-            static::_unlink($options['overcomeAdversity'], $options['unlinkOthers']);
+            call_user_func(array(__CLASS__, 'unlink'), $options['overcomeAdversity'], $options['unlinkOthers']);
         });
     }
 
@@ -62,7 +62,7 @@ class PidFile
         }
     }
 
-    protected static function _unlink($overcomeAdversity = false, $unlinkOthers = false)
+    public static function unlink($overcomeAdversity = false, $unlinkOthers = false)
     {
         $pidFile = static::_getPath();
         if ( !file_exists($pidFile) && !$acceptFailure ) {
@@ -75,14 +75,14 @@ class PidFile
 
         $pidFilePid = file_get_contents($pidFile);
         if ( $pidFilePid != getmypid() && !$evenOthers ) {
-            static::_exit("Unwilling to unlink pidfile containing a different process ID.", [
+            static::_exit("Unwilling to unlink pidfile containing a different process ID.", array (
                 'pidFromFile' => $pidFilePid,
-            ]);
+            ));
         }
         unlink($pidFile);
     }
 
-    protected static function _exit($msg, $context=[])
+    protected static function _exit($msg, $context=array())
     {
         $context['pidFile'] = static::_getPath();
         $context['myPid'] = getmypid();
